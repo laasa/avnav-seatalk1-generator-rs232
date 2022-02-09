@@ -23,6 +23,8 @@ The following bytes are written to RS232:
 - Addtional byte: 0x12: LSB for value for 'Depth below transducer'
 - Addtional byte: 0x34: MSB for value for 'Depth below transducer'
 The resulting value for 'Depth below transducer' is 0x3412/10 feets (13330/10 feets = 1333 feets = 406,2984 meters).
+
+# Hardware needs
 You need to have a circuit to convert to Seatalk 1 level (described in http://www.thomasknauf.de/rap/seatalk3.htm: only the TXD part).
 ![grafik](https://user-images.githubusercontent.com/98450191/153191823-b1585581-9782-45ab-b2a4-1c544deb7676.png)
 
