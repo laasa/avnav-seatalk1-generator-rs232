@@ -26,8 +26,12 @@ The following bytes are written to RS232:
 The resulting value for 'Depth below transducer' is 0x2211/10 feets (8721/10 feets = 872,1 feets = 265,81608 meters).
 
 # Hardware needs
-You need to have a circuit to convert from RS232 level to Seatalk 1 level (described in http://www.thomasknauf.de/rap/seatalk3.htm: only the TXD part).
-![grafik](https://user-images.githubusercontent.com/98450191/153191823-b1585581-9782-45ab-b2a4-1c544deb7676.png)
+You need to have a circuit to convert from RS232 level to Seatalk 1 level (described in http://www.thomasknauf.de/rap/seatalk3.htm).
+
+I have used only the TXD part here:
+
+![grafik](https://user-images.githubusercontent.com/98450191/153364093-61c8a10d-0b68-42a2-8dae-0e706e0a035f.png)
+
 
 # Installation
 
