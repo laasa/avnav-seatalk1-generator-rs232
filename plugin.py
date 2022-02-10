@@ -127,25 +127,33 @@ class Plugin:
       if not self.isConnected:
         return {'status': 'not connected'}
       try:
-        #self.sendCommand(b'23 20')
-
-        #send = bytearray([0x00, 0x02,0x12,0x34])
-        #self.connection.write(send)
-
-        # send command byte with parity set
-        self.connection.parity = serial.PARITY_MARK
-        send = bytearray([0x00])
+        # send command byte 0x00 with parity bit set
+        send = bytearray([0x00,0x02])
         self.connection.write(send)
+        self.connection.flushOutput()
+        self.connection.flush()
+        time.sleep(3)
 
-        # send other bytes bytes with parity reset
+        # send  Attribute 0x02, Adddata 0x12&0x34 with parity bit reset
         self.connection.parity = serial.PARITY_SPACE
-        send = bytearray([0x02,0x12,0x34]) # Attribute 0x02, Adddata 0x12,0x34, parity is reset
+        self.connection.close()
+        self.connection.open()
+        send = bytearray([0x00,0x11,0x22])
         self.connection.write(send)
+        self.connection.flushOutput()
+        self.connection.flush()
 
+        self.connection.parity = serial.PARITY_MARK
+        self.connection.close()
+        self.connection.open()
+        time.sleep(3)
+
+        self.api.log("SEATALK frame written")
+        
       except Exception as e:
         self.api.error("unable to send command to %s: %s" % (self.device, str(e)))
 
-      time.sleep(10)
+      time.sleep(1)
 
   def handleConnection(self):
     changeSequence=self.changeSequence
