@@ -45,8 +45,8 @@ I have used only the TXD part here:
 # Installation
 
 To install this plugin please 
-- create directory '/usr/lib/avnav/plugins/seatalk1-generator' and 
-- and copy the file plugin.py to it.
+- create directory '/usr/lib/avnav/plugins/seatalk1-generator-rs232' and 
+- and copy the file plugin.py to this directory.
 
 # Known issues
 Changing the parity flag is one way for implementing SEATALK via RS232 but doesn't work as expected here. 
