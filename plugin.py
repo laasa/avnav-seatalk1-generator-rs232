@@ -127,14 +127,14 @@ class Plugin:
       if not self.isConnected:
         return {'status': 'not connected'}
       try:
-        # send command byte 0x00 with parity bit set
+        # DPT: 00  02  YZ  XX XX  Depth below transducer: XXXX/10 feet
+        # send command byte 0x00 with parity bit set and attribute 0x02
         send = bytearray([0x00,0x02])
         self.connection.write(send)
         self.connection.flushOutput()
         self.connection.flush()
         time.sleep(3)
-
-        # send  Attribute 0x02, Adddata 0x12&0x34 with parity bit reset
+        # send first data 0x00 and add data 0x12,0x34 with parity bit reset
         self.connection.parity = serial.PARITY_SPACE
         self.connection.close()
         self.connection.open()
@@ -142,11 +142,31 @@ class Plugin:
         self.connection.write(send)
         self.connection.flushOutput()
         self.connection.flush()
-
         self.connection.parity = serial.PARITY_MARK
         self.connection.close()
         self.connection.open()
         time.sleep(3)
+
+        # STW: 20  01  XX  XX  Speed through water: XXXX/10 Knots
+        # send command byte 0x20 with parity bit set and attribute 0x01
+        send = bytearray([0x20,0x01])
+        self.connection.write(send)
+        self.connection.flushOutput()
+        self.connection.flush()
+        time.sleep(3)
+        # send first data 0x22 and add data 0x11 with parity bit reset
+        self.connection.parity = serial.PARITY_SPACE
+        self.connection.close()
+        self.connection.open()
+        send = bytearray([0x22,0x11])
+        self.connection.write(send)
+        self.connection.flushOutput()
+        self.connection.flush()
+        self.connection.parity = serial.PARITY_MARK
+        self.connection.close()
+        self.connection.open()
+        time.sleep(3)
+
 
         self.api.log("SEATALK frame written")
         
