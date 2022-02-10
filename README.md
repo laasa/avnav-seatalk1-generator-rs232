@@ -6,8 +6,17 @@ The plugin generates a seatalk 1 protocol output via RS232 every 10 seconds whic
 
 It is widely based on the seatalk remote plugin (https://github.com/wellenvogel/avnav-seatalk-remote-plugin).
 
-The idea behind is to create a second plugin to read seatalk1 protocol frames via rs232(PC) or gpio (RPI) without using signalk way.
-With that plugin you can test the second plugin without a boat (it is winter project: to cold to try it out in real).
+There exist the way to activate the GPIO plugin in openplotter/signalk.
+But especially for beginners like me it's possibly a bit to complicate to get knowledge 
+- which software serve the hardware, 
+- which one is storing the value and 
+- what is the way to get these values in avnav.
+It takes a bit of time to understand the powerful ideas of multiplexing between all the software in openplotter family.
+To get in touch with avnav plugin programming and python and to have simple and short data ways.
+Especially the last thing could be interesting: To have the most current 'depth below transducer' value and not the 2 seconds old one.
+
+So the idea behind this plugin is to create other plugins to read seatalk1 protocol frames via rs232(PC) or gpio (RPI) without using signalk way.
+With that plugin you can test these plugins without your boat on your side (currently it's winter: to cold to try it out in real).
 
 # Parameter
 
@@ -40,8 +49,8 @@ To install this plugin please
 - and copy the file plugin.py to it.
 
 # Known issues
-Changing the parity flag doesn't really work here. 
-But Could imagine several reasons (USB-to-RS232-dongle, DIY hardware, python serial).
-With that given code I got the seatalk protocol '$STALK,00,02,00,89,22' (when reading via GPIO on raspberry). 
+Changing the parity flag is one way for implementing SEATALK via RS232 but doesn't work as expected here. 
+I could imagine several reasons like USB-to-RS232-dongle, DIY hardware or inside python serial.
+With the implemented code I got the seatalk protocol '$STALK,00,02,00,89,22' mostly of the time (when reading via GPIO on raspberry). 
 Therefore I see 0x2289/10 feets on signalk server (8841/10 feets = 269,47368 meters).
-That is not what I expected but it's good enough to do the real job: reading the seatalk protocol inside avnav protocol directly.
+That is not what I expected but it's good enough to do the real job: reading the seatalk protocol inside avnav plugin directly.
