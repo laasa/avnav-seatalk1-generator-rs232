@@ -127,49 +127,55 @@ class Plugin:
       if not self.isConnected:
         return {'status': 'not connected'}
       try:
-        # DPT: 00  02  YZ  XX XX  Depth below transducer: XXXX/10 feet
-        # send command byte 0x00 with parity bit set and attribute 0x02
-        send = bytearray([0x00,0x02])
-        self.connection.write(send)
+        ''' DPT: 00  02  YZ  XX XX  Depth below transducer: XXXX/10 feet '''
+        ''' write DBT Seatalk frame => 0x00DD => 22,1 feets => 6,736 meters (divisor 3,683) '''
+        self.connection.write(b'\x00\x02')
         self.connection.flushOutput()
         self.connection.flush()
-        time.sleep(3)
-        # send first data 0x00 and add data 0x12,0x34 with parity bit reset
+        while self.connection.out_waiting != 0:
+          time.sleep(0.1)
+        time.sleep(2)
         self.connection.parity = serial.PARITY_SPACE
         self.connection.close()
         self.connection.open()
-        send = bytearray([0x00,0x11,0x22])
-        self.connection.write(send)
+        self.connection.parity = serial.PARITY_SPACE
+        self.connection.write(b'\x00\xDD\x00')
         self.connection.flushOutput()
         self.connection.flush()
+        while self.connection.out_waiting != 0:
+          time.sleep(0.1)
+        time.sleep(2)
         self.connection.parity = serial.PARITY_MARK
         self.connection.close()
         self.connection.open()
-        time.sleep(3)
+        self.connection.parity = serial.PARITY_MARK
+        self.api.log("SEATALK DBT frame written")
 
-        # STW: 20  01  XX  XX  Speed through water: XXXX/10 Knots
-        # send command byte 0x20 with parity bit set and attribute 0x01
-        send = bytearray([0x20,0x01])
-        self.connection.write(send)
+
+        ''' STW: 20  01  XX  XX  Speed through water: XXXX/10 Knots '''
+        ''' write STW Seatalk frame => 0x003b => 5,9 kn => 10,93 km/h (multiply with 1,852)'''
+        self.connection.write(b'\x20\x01')
         self.connection.flushOutput()
         self.connection.flush()
-        time.sleep(3)
-        # send first data 0x22 and add data 0x11 with parity bit reset
+        while self.connection.out_waiting != 0:
+          time.sleep(0.1)
+        time.sleep(2)
         self.connection.parity = serial.PARITY_SPACE
         self.connection.close()
         self.connection.open()
-        send = bytearray([0x22,0x11])
-        self.connection.write(send)
+        self.connection.parity = serial.PARITY_SPACE
+        self.connection.write(b'\x3b\x00')
         self.connection.flushOutput()
         self.connection.flush()
+        while self.connection.out_waiting != 0:
+          time.sleep(0.1)
+        time.sleep(2)
         self.connection.parity = serial.PARITY_MARK
         self.connection.close()
         self.connection.open()
-        time.sleep(3)
+        self.connection.parity = serial.PARITY_MARK
+        self.api.log("SEATALK STW frame written")
 
-
-        self.api.log("SEATALK frame written")
-        
       except Exception as e:
         self.api.error("unable to send command to %s: %s" % (self.device, str(e)))
 
