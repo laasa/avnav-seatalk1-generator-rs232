@@ -93,6 +93,7 @@ class Plugin:
     changeSequence=self.changeSequence
     seq=0
     self.api.log("started")
+    self.api.setStatus('STARTED', 'running')
     enabled=self.getConfigValue('enabled')
     if enabled is not None and enabled.lower()!='true':
       self.api.setStatus("INACTIVE", "disabled by config")
@@ -199,7 +200,7 @@ class Plugin:
         self.isBusy=False
         try:
           self.connection = serial.Serial(port=pnum, baudrate=4800, bytesize=serial.EIGHTBITS, parity=serial.PARITY_MARK, stopbits=serial.STOPBITS_ONE, timeout=None, xonxoff=False, rtscts=False, dsrdtr=False)
-          self.api.setStatus("SEATALK1","connected to %s at 4800"%(self.device))
+          self.api.setStatus("NMEA","connected to %s at 4800"%(self.device))
           self.api.log("connected to %s at 4800" % (self.device))
           self.isConnected=True
           errorReported=False
