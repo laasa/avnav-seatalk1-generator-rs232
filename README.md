@@ -46,16 +46,17 @@ The resulting value for 'Speed Through Water' is 0x003b/10 kn (59/10 kn = 5,9 kn
 # Hardware needs
 You need to have a circuit to convert from RS232 level to Seatalk 1 level (described in http://www.thomasknauf.de/rap/seatalk3.htm).
 
-I have used only the TXD part here:
+I have used only the RXD part here:
 
-![grafik](https://user-images.githubusercontent.com/98450191/153364093-61c8a10d-0b68-42a2-8dae-0e706e0a035f.png)
+![grafik](https://user-images.githubusercontent.com/98450191/153572224-3739fd3e-790b-4c15-8529-6957151fe246.png)
 
 
 # Installation
 
 To install this plugin please 
+- install packages via: sudo apt-get update && sudo apt-get install python3-serial
 - create directory '/usr/lib/avnav/plugins/seatalk1-generator-rs232' and 
 - and copy the file plugin.py to this directory.
 
 # Known issues
-- switching parity bit on the fly seems to be a crazy thing?
+
