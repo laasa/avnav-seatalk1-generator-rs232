@@ -215,37 +215,3 @@ class Plugin:
           self.isConnected=False
           time.sleep(1)
       time.sleep(1)
-
-  def deviceConnected(self,device):
-    if self.device == device:
-      return
-    try:
-      if self.connection is not None:
-        self.connection.close()
-    except:
-      pass
-    self.connection=None
-    self.api.log("device connected %s",device)
-    self.device=device
-
-  def sendCommand(self,val):
-    #we avoid blocking multiple threads here
-    canWrite=False
-    self.condition.acquire()
-    if not self.isBusy:
-      self.isBusy=True
-      canWrite=True
-    self.condition.release()
-    if not canWrite:
-      raise Exception("busy")
-    try:
-      self.connection.write((val).encode('ascii'))
-    except Exception as e:
-      self.condition.acquire()
-      self.isBusy=False
-      self.condition.release()
-      raise
-    self.condition.acquire()
-    self.isBusy = False
-    self.condition.release()
-
