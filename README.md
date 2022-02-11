@@ -2,7 +2,7 @@
 
 # General
 
-The plugin generates a seatalk 1 protocol output via RS232 every 10 seconds which sets the depth value to a nearly fixed value of 269,47368 meters.
+The plugin generates a seatalk 1 protocol output via RS232 every 10 seconds which sets the depth (DBT) to 6,7 meters and speed (STW) to 10,9 km/h.
 
 It is widely based on the seatalk remote plugin (https://github.com/wellenvogel/avnav-seatalk-remote-plugin).
 
@@ -28,12 +28,20 @@ With that plugin you can test these plugins without your boat on your side (curr
 
 The Seatalk 1 protocol is simply written to the selected device every 10 seconds.
 The following bytes are written to RS232:
+
 - Byte 1: Command byte             : 0x00 => parity bit is set to mark up the start of Seatalk protocol
 - Byte 2: Attribute byte           : 0x02 => LSB is the number of following bytes (n=2)
 - Byte 3: First mandatory data byte: 0x00 => YZ: in feets
-- Byte 4: optionially data byte 1  : 0x11: LSB for value for 'Depth below transducer'
-- Byte 5: optionially data byte 2  : 0x22: MSB for value for 'Depth below transducer'
-The resulting value for 'Depth below transducer' is 0x2211/10 feets (8721/10 feets = 872,1 feets = 265,81608 meters).
+- Byte 4: optionially data byte 1  : 0xdd: LSB for value for 'Depth below transducer'
+- Byte 5: optionially data byte 2  : 0x00: MSB for value for 'Depth below transducer'
+The resulting value for 'Depth below transducer' is 0x00dd/10 feets (221/10 feets = 22,1 feets = 6,7 meters).
+
+- Byte 1: Command byte             : 0x20 => parity bit is set to mark up the start of Seatalk protocol
+- Byte 2: Attribute byte           : 0x01 => LSB is the number of following bytes (n=1)
+- Byte 3: First mandatory data byte: 0x3B => LSB for value for 'Speed Through Water'
+- Byte 4: optionially data byte 1  : 0x00: MSB for value for 'Speed Through Water'
+The resulting value for 'Speed Through Water' is 0x003b/10 kn (59/10 kn = 5,9 kn = 10,9 km/h).
+
 
 # Hardware needs
 You need to have a circuit to convert from RS232 level to Seatalk 1 level (described in http://www.thomasknauf.de/rap/seatalk3.htm).
@@ -50,8 +58,4 @@ To install this plugin please
 - and copy the file plugin.py to this directory.
 
 # Known issues
-Changing the parity flag is one way for implementing SEATALK via RS232 but doesn't work as expected here. 
-I could imagine several reasons like USB-to-RS232-dongle, DIY hardware or inside python serial.
-With the implemented code I got the seatalk protocol '$STALK,00,02,00,89,22' mostly of the time (when reading via GPIO on raspberry). 
-Therefore I see 0x2289/10 feets on signalk server (8841/10 feets = 269,47368 meters).
-That is not what I expected but it's good enough to do the real job: reading the seatalk protocol inside avnav plugin directly.
+- switching parity bit on the fly seems to be a crazy thing?
