@@ -29,6 +29,7 @@ With that plugin you can test these plugins without your boat on your side (curr
 The Seatalk 1 protocol is simply written to the selected device every 10 seconds.
 The following bytes are written to RS232:
 
+DPT 'Depth below transducer' of 6,7 meters
 - Byte 1: Command byte             : 0x00 => parity bit is set to mark up the start of Seatalk protocol
 - Byte 2: Attribute byte           : 0x02 => LSB is the number of following bytes (n=2)
 - Byte 3: First mandatory data byte: 0x00 => YZ: in feets
@@ -36,12 +37,12 @@ The following bytes are written to RS232:
 - Byte 5: optionially data byte 2  : 0x00: MSB for value for 'Depth below transducer'
 The resulting value for 'Depth below transducer' is 0x00dd/10 feets (221/10 feets = 22,1 feets = 6,7 meters).
 
+STW 'Speed Through Water' of 10,9 km/h
 - Byte 1: Command byte             : 0x20 => parity bit is set to mark up the start of Seatalk protocol
 - Byte 2: Attribute byte           : 0x01 => LSB is the number of following bytes (n=1)
 - Byte 3: First mandatory data byte: 0x3B => LSB for value for 'Speed Through Water'
 - Byte 4: optionially data byte 1  : 0x00: MSB for value for 'Speed Through Water'
 The resulting value for 'Speed Through Water' is 0x003b/10 kn (59/10 kn = 5,9 kn = 10,9 km/h).
-
 
 # Hardware needs
 You need to have a circuit to convert from RS232 level to Seatalk 1 level (described in http://www.thomasknauf.de/rap/seatalk3.htm).
