@@ -24,6 +24,11 @@ class Plugin:
       'name': 'debuglevel',
       'description': 'set to the debuglevel',
       'default': '0'
+    },
+    {
+      'name': 'dynamic',
+      'description': 'enable dynamic',
+      'default': '0'
     }
   ]
   @classmethod
@@ -59,6 +64,7 @@ class Plugin:
     self.connection=None
     self.device=None
     self.debuglevel=None
+    self.dynamic=None
     self.target=None
     self.isBusy=False
     self.condition=threading.Condition()
@@ -68,6 +74,11 @@ class Plugin:
       self.api.registerRestart(self._apiRestart)
     self.changeSequence=0
     self.startSequence=0
+
+    self.DBT = 6.7
+    self.DBT_step = 0.1
+    self.STW = 10.9
+    self.STW_step = 0.5
 
   def _apiRestart(self):
     self.startSequence+=1
@@ -113,6 +124,7 @@ class Plugin:
     usbid=None
     try:
       self.device=self.getConfigValue('device')
+      self.dynamic=self.getConfigValue('dynamic')
       self.debuglevel=self.getConfigValue('debuglevel')
       self.target=self.getConfigValue('target')
       usbid=self.getConfigValue('usbid')
@@ -154,12 +166,17 @@ class Plugin:
         time.sleep(0.1)
         self.connection.parity = serial.PARITY_SPACE
         if(self.target == "rpi-gpio"):
-          self.connection.write(b'\x00\xDD\x00')
+          self.connection.write(b'\x00')
         else:
-          self.connection.write(b'\x02\x00\xDD\x00')
+          self.connection.write(b'\x02\x00')
+
+        DBT = int((self.DBT * (10.0 * 3.281)) + 0.5)
+        byte_array = DBT.to_bytes(2,"little")
+        self.connection.write(byte_array)
+
         time.sleep(0.1)
         if(int(self.debuglevel) > 0):
-          self.api.log("SEATALK DBT frame written")
+          self.api.log("SEATALK DBT frame written: "+ str(self.DBT) + ", INT: " + str(DBT))
 
 
         ''' STW: 20  01  XX  XX  Speed through water: XXXX/10 Knots '''
@@ -172,13 +189,16 @@ class Plugin:
           self.connection.write(b'\x20')
         time.sleep(0.1)
         self.connection.parity = serial.PARITY_SPACE
-        if(self.target == "rpi-gpio"):
-          self.connection.write(b'\x3b\x00')
-        else:
-          self.connection.write(b'\x01\x3b\x00')
+        if(self.target != "rpi-gpio"):
+          self.connection.write(b'\x01')
+
+        STW = int((((self.STW * 10.0) / 1.852)) + 0.5)
+        byte_array = STW.to_bytes(2,"little")
+        self.connection.write(byte_array)
+
         time.sleep(0.1)
         if(int(self.debuglevel) > 0):
-          self.api.log("SEATALK STW frame written")
+          self.api.log("SEATALK STW frame written: " + str(self.STW) + ", INT: " + str(STW))
 
       except Exception as e:
         self.api.error("unable to send command to %s: %s" % (self.device, str(e)))
@@ -210,7 +230,32 @@ class Plugin:
           #continously read data to get an exception if disconnected
           while True:
             #self.connection.readline(10)
-            time.sleep(1)
+
+            if(int(self.dynamic) > 0):
+              self.DBT += self.DBT_step
+              if(self.DBT > 20.0):
+                self.DBT = 20.0
+                self.DBT_step = -0.5
+              if(self.DBT < 0.5):
+                self.DBT = 0.5
+                self.DBT_step = +0.5
+
+              self.STW += self.STW_step
+              if(self.STW > 13.0):
+                self.STW = 13.0
+                self.STW_step = -0.2
+              if(self.STW < 1.0):
+                self.STW = 1.0
+                self.STW_step = +0.2
+            else:
+              self.DBT = 6.7
+              self.DBT_step = 0.1
+              self.STW = 10.9
+              self.STW_step = 0.5
+
+
+            time.sleep(2)
+
         except Exception as e:
           if not errorReported:
             self.api.setStatus("ERROR","unable to connect/connection lost to %s: %s"%(self.device, str(e)))
