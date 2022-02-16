@@ -14,6 +14,16 @@ class Plugin:
       'name': 'usbid',
       'description': 'set to the usbid of the device (alternative to device)',
       'default': ''
+    },
+    {
+      'name': 'target',
+      'description': 'select the target (rs232  rpi-gpio)',
+      'default': 'rs232'
+    },
+    {
+      'name': 'debuglevel',
+      'description': 'set to the debuglevel',
+      'default': '0'
     }
   ]
   @classmethod
@@ -48,6 +58,8 @@ class Plugin:
     self.isConnected=False
     self.connection=None
     self.device=None
+    self.debuglevel=None
+    self.target=None
     self.isBusy=False
     self.condition=threading.Condition()
     if hasattr(self.api,'registerEditableParameters'):
@@ -101,6 +113,8 @@ class Plugin:
     usbid=None
     try:
       self.device=self.getConfigValue('device')
+      self.debuglevel=self.getConfigValue('debuglevel')
+      self.target=self.getConfigValue('target')
       usbid=self.getConfigValue('usbid')
       if usbid == '':
         usbid=None
@@ -128,54 +142,43 @@ class Plugin:
       if not self.isConnected:
         return {'status': 'not connected'}
       try:
+
         ''' DPT: 00  02  YZ  XX XX  Depth below transducer: XXXX/10 feet '''
         ''' write DBT Seatalk frame => 0x00DD => 22,1 feets => 6,736 meters (divisor 3,683) '''
-        self.connection.write(b'\x00\x02')
         self.connection.flushOutput()
-        self.connection.flush()
-        while self.connection.out_waiting != 0:
-          time.sleep(0.1)
-        time.sleep(2)
-        self.connection.parity = serial.PARITY_SPACE
-        self.connection.close()
-        self.connection.open()
-        self.connection.parity = serial.PARITY_SPACE
-        self.connection.write(b'\x00\xDD\x00')
-        self.connection.flushOutput()
-        self.connection.flush()
-        while self.connection.out_waiting != 0:
-          time.sleep(0.1)
-        time.sleep(2)
         self.connection.parity = serial.PARITY_MARK
-        self.connection.close()
-        self.connection.open()
-        self.connection.parity = serial.PARITY_MARK
-        self.api.log("SEATALK DBT frame written")
+        if(self.target == "rpi-gpio"):
+          self.connection.write(b'\x00\x02')
+        else:
+          self.connection.write(b'\x00')
+        time.sleep(0.1)
+        self.connection.parity = serial.PARITY_SPACE
+        if(self.target == "rpi-gpio"):
+          self.connection.write(b'\x00\xDD\x00')
+        else:
+          self.connection.write(b'\x02\x00\xDD\x00')
+        time.sleep(0.1)
+        if(int(self.debuglevel) > 0):
+          self.api.log("SEATALK DBT frame written")
 
 
         ''' STW: 20  01  XX  XX  Speed through water: XXXX/10 Knots '''
         ''' write STW Seatalk frame => 0x003b => 5,9 kn => 10,93 km/h (multiply with 1,852)'''
-        self.connection.write(b'\x20\x01')
         self.connection.flushOutput()
-        self.connection.flush()
-        while self.connection.out_waiting != 0:
-          time.sleep(0.1)
-        time.sleep(2)
-        self.connection.parity = serial.PARITY_SPACE
-        self.connection.close()
-        self.connection.open()
-        self.connection.parity = serial.PARITY_SPACE
-        self.connection.write(b'\x3b\x00')
-        self.connection.flushOutput()
-        self.connection.flush()
-        while self.connection.out_waiting != 0:
-          time.sleep(0.1)
-        time.sleep(2)
         self.connection.parity = serial.PARITY_MARK
-        self.connection.close()
-        self.connection.open()
-        self.connection.parity = serial.PARITY_MARK
-        self.api.log("SEATALK STW frame written")
+        if(self.target == "rpi-gpio"):
+          self.connection.write(b'\x20\x01')
+        else:
+          self.connection.write(b'\x20')
+        time.sleep(0.1)
+        self.connection.parity = serial.PARITY_SPACE
+        if(self.target == "rpi-gpio"):
+          self.connection.write(b'\x3b\x00')
+        else:
+          self.connection.write(b'\x01\x3b\x00')
+        time.sleep(0.1)
+        if(int(self.debuglevel) > 0):
+          self.api.log("SEATALK STW frame written")
 
       except Exception as e:
         self.api.error("unable to send command to %s: %s" % (self.device, str(e)))
@@ -206,7 +209,8 @@ class Plugin:
           errorReported=False
           #continously read data to get an exception if disconnected
           while True:
-            self.connection.readline(10)
+            #self.connection.readline(10)
+            time.sleep(1)
         except Exception as e:
           if not errorReported:
             self.api.setStatus("ERROR","unable to connect/connection lost to %s: %s"%(self.device, str(e)))
