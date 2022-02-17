@@ -253,7 +253,6 @@ class Plugin:
               self.STW = 10.9
               self.STW_step = 0.5
 
-
             time.sleep(2)
 
         except Exception as e:
