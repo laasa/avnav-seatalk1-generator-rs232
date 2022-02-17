@@ -1,10 +1,11 @@
-# avnav-seatalk1-generator-rs232
+# avnav-seatalk1-simulator-rs232
 
 ![grafik](https://user-images.githubusercontent.com/98450191/153687947-2c0b2547-b184-4cfd-bf48-38300e376872.png)
 
 # General
 
-The plugin generates a seatalk 1 protocol output via RS232 every 10 seconds which sets the depth (DBT) to 6,7 meters and speed (STW) to 10,9 km/h.
+The plugin simulates seatalk 1 protocol cyclic outputs via RS232.
+It sets the depth (DBT) and speed (STW) like ST50Plus Tridata does.
 
 It is widely based on the seatalk remote plugin (https://github.com/wellenvogel/avnav-seatalk-remote-plugin).
 
