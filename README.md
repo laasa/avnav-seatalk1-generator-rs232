@@ -47,6 +47,8 @@ STW 'Speed Through Water' of 10,9 km/h
 - Byte 4: optionially data byte 1  : 0x00: MSB for value for 'Speed Through Water'
 The resulting value for 'Speed Through Water' is 0x003b/10 kn (59/10 kn = 5,9 kn = 10,9 km/h).
 
+It is possible that these plugin and avnav-anchor-chain-simulator-rs232 plugin can share the same device (e.g. "/dev/ttyUSB_SeatalkOut")
+
 # Hardware needs
 You need to have a circuit to convert from RS232 level to Seatalk 1 level (described in http://www.thomasknauf.de/rap/seatalk3.htm).
 
