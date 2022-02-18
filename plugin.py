@@ -8,7 +8,7 @@ class Plugin:
     {
       'name': 'device',
       'description': 'set to the device path (alternative to usbid)',
-      'default': ''
+      'default': '/dev/ttyUSB_SeatalkOut'
     },
     {
       'name': 'usbid',
