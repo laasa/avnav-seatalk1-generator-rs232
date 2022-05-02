@@ -147,7 +147,7 @@ class Plugin:
       self.api.setStatus("STARTED", "using usbid %s, baud=4800" % (usbid))
     else:
       self.api.setStatus("STARTED","using device %s, baud=4800"%(self.device))
-    connectionHandler=threading.Thread(target=self.handleConnection, name='seatalk-remote-connection')
+    connectionHandler=threading.Thread(target=self.handleConnection, name='seatalk1-simulator-rs232')
     connectionHandler.setDaemon(True)
     connectionHandler.start()
     while changeSequence == self.changeSequence:
@@ -160,15 +160,15 @@ class Plugin:
         self.connection.flushOutput()
         self.connection.parity = serial.PARITY_MARK
         if(self.target == "rpi-gpio"):
-          self.connection.write(b'\x00\x02')
+          self.connection.write(b'\x00\x42')
         else:
           self.connection.write(b'\x00')
         time.sleep(0.1)
         self.connection.parity = serial.PARITY_SPACE
         if(self.target == "rpi-gpio"):
-          self.connection.write(b'\x00')
+          self.connection.write(b'\x64')
         else:
-          self.connection.write(b'\x02\x00')
+          self.connection.write(b'\x42\x64')
 
         DBT = int((self.DBT * (10.0 * 3.281)) + 0.5)
         byte_array = DBT.to_bytes(2,"little")
@@ -184,13 +184,13 @@ class Plugin:
         self.connection.flushOutput()
         self.connection.parity = serial.PARITY_MARK
         if(self.target == "rpi-gpio"):
-          self.connection.write(b'\x20\x01')
+          self.connection.write(b'\x20\x41')
         else:
           self.connection.write(b'\x20')
         time.sleep(0.1)
         self.connection.parity = serial.PARITY_SPACE
         if(self.target != "rpi-gpio"):
-          self.connection.write(b'\x01')
+          self.connection.write(b'\x41')
 
         STW = int((((self.STW * 10.0) / 1.852)) + 0.5)
         byte_array = STW.to_bytes(2,"little")
@@ -199,6 +199,25 @@ class Plugin:
         time.sleep(0.1)
         if(int(self.debuglevel) > 0):
           self.api.log("SEATALK STW frame written: " + str(self.STW) + ", INT: " + str(STW))
+
+        ''' MTW: 23  01  XX  YY  water temperature: XX deg C, YY deg F  '''
+        self.connection.flushOutput()
+        self.connection.parity = serial.PARITY_MARK
+        if(self.target == "rpi-gpio"):
+          self.connection.write(b'\x23\x41')
+        else:
+          self.connection.write(b'\x23')
+        time.sleep(0.1)
+        self.connection.parity = serial.PARITY_SPACE
+        if(self.target != "rpi-gpio"):
+          self.connection.write(b'\x41')
+
+        self.connection.write(b'\x04')
+        self.connection.write(b'\x27')
+
+        time.sleep(0.1)
+        if(int(self.debuglevel) > 0):
+          self.api.log("SEATALK MTW frame written: " + str(self.MTW) + ", INT: " + str(MTW))
 
       except Exception as e:
         self.api.error("unable to send command to %s: %s" % (self.device, str(e)))
